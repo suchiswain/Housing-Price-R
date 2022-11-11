@@ -5,6 +5,7 @@ library("readxl")
 ##install.packages("rlang")
 ##install.packages("ggplot2")
 library(ggplot2)
+library(ggpubr)
 
 ## Read the dataframe from excel file
 Housing_Values <- read_excel("Housing_Data_All_Predictors.xlsx")
@@ -39,15 +40,18 @@ Housing_Values_3 <- Housing_Values_3 %>%
 
 #Plots for all msa's for each predictor
 
-ggplot(Housing_Values_3, aes(x=House_Value_Index ,y=Mortgage_Rate,color=city))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p1<- ggplot(Housing_Values_3, aes(x=House_Value_Index ,y=Mortgage_Rate,color=city))+  geom_point() + geom_smooth(method="lm", se = FALSE)
 
-ggplot(Housing_Values_3, aes(x=House_Value_Index ,y=Inventory,color=city))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p2<-ggplot(Housing_Values_3, aes(x=House_Value_Index ,y=Inventory,color=city))+  geom_point() + geom_smooth(method="lm", se = FALSE)
 
-ggplot(Housing_Values_3, aes(x=House_Value_Index ,y=Inflation_Rate,color=city))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p3<-ggplot(Housing_Values_3, aes(x=House_Value_Index ,y=Inflation_Rate,color=city))+  geom_point() + geom_smooth(method="lm", se = FALSE)
 
-ggplot(Housing_Values_3, aes(x=House_Value_Index ,y=Median_House_size,color=city))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p4<-ggplot(Housing_Values_3, aes(x=House_Value_Index ,y=Median_House_size,color=city))+  geom_point() + geom_smooth(method="lm", se = FALSE)
 
 
+ggarrange(p1,p2,p3,p4,
+          labels = c("A", "B", "C","D"),
+          ncol = 1, nrow = 4)
 
 # Filter data for Raleigh msa
 Housing_Values_Raleigh<- Housing_Values_3 %>% filter(city=='Raleigh')
