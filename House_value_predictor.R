@@ -32,21 +32,26 @@ names(Housing_Values_1)
 Housing_Values_3 <- separate(Housing_Values_2, 'Region_Name', into = c("city", "state"), sep = ",") %>%
   mutate(city = str_trim(city), state= str_trim(state))
 
+# add a log value for price as a new column
 Housing_Values_3 <- Housing_Values_3 %>% 
   mutate(log_Price= log(House_Value_Index))  
+
+hist(Housing_Values_3$House_Value_Index)
+
+hist(Housing_Values_3$log_Price)
 
 # Housing_Values_Raleigh <- Housing_Values_Raleigh %>% 
 #   mutate(log_Mortgage= log(Mortgage_Rate)) 
 
 #Plots for all msa's for each predictor
 
-p1<- ggplot(Housing_Values_3, aes(x=House_Value_Index ,y=Mortgage_Rate,color=city))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p1<- ggplot(Housing_Values_3, aes(x=log_Price ,y=Mortgage_Rate,color=city))+  geom_point() + geom_smooth(method="loess", se = FALSE)
 
-p2<-ggplot(Housing_Values_3, aes(x=House_Value_Index ,y=Inventory,color=city))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p2<-ggplot(Housing_Values_3, aes(x=log_Price ,y=Inventory,color=city))+  geom_point() + geom_smooth(method="loess", se = FALSE)
 
-p3<-ggplot(Housing_Values_3, aes(x=House_Value_Index ,y=Inflation_Rate,color=city))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p3<-ggplot(Housing_Values_3, aes(x=log_Price ,y=Inflation_Rate,color=city))+  geom_point() + geom_smooth(method="loess", se = FALSE)
 
-p4<-ggplot(Housing_Values_3, aes(x=House_Value_Index ,y=Median_House_size,color=city))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p4<-ggplot(Housing_Values_3, aes(x=log_Price ,y=Median_House_size,color=city))+  geom_point() + geom_smooth(method="loess", se = FALSE)
 
 
 ggarrange(p1,p2,p3,p4,
