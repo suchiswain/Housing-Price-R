@@ -5,6 +5,7 @@ library("readxl")
 ##install.packages("ggplot2")
 library(ggplot2)
 library(ggpubr)
+library(lubridate)
 
 ## Read the dataframe from excel file
 House_Values <- read.csv("realtor-data.csv")
@@ -13,11 +14,11 @@ House_Values$sold_date <- as.Date(House_Values$sold_date)
 str(House_Values)
 summary(House_Values)
 
-FIPS_Values <- read.csv("ZIP-COUNTY-FIPS_2017-06.csv")
-summary(FIPS_Values)
-
-FIPS_Values <- FIPS_Values %>% 
-  select(ZIP,STCOUNTYFP)
+# FIPS_Values <- read.csv("ZIP-COUNTY-FIPS_2017-06.csv")
+# summary(FIPS_Values)
+# 
+# FIPS_Values <- FIPS_Values %>% 
+#   select(ZIP,STCOUNTYFP)
 
 
 
@@ -56,7 +57,7 @@ Housing_Values_Sort <- House_Values_2[order(-House_Values_2$price),]
 
 Housing_Values_Sort <- House_Values_2[order(-House_Values_2$house_size),] 
 
-#Filter houses with less than 3 million to remove the data inparity
+#Filter houses with less than 3 million to remove the data outliers
 House_Values_2<- House_Values_2 %>% filter(price<30000000)
 summary(House_Values_2)
 
@@ -91,69 +92,125 @@ House_Values_3 <- House_Values_2 %>% inner_join(Schools_Count, by=c("zip_code"="
   inner_join(Hospitals_Count, by=c("zip_code"="ZIP"))
 summary(House_Values_3)
 
+#converting sold date to the first date of the month in to the new column 
+House_Values_3 <- House_Values_3 %>%
+  mutate(new_date=lubridate::floor_date(sold_date, unit = "month"))
 
 
-#Plots without school data
+# Sucharitha' Code for Mortgage merge
+#converting the column to date format
+House_Values_3$new_date <- as.Date( House_Values_3$new_date )
+str(House_Values_3)
 
-ggplot(House_Values_2, aes(x=sold_date ,y=price))+  geom_line() + geom_smooth(method="lm", se = FALSE)
+#Reading the Mortgage date
+mortgage_rate <- read_excel("MORTGAGE30US.xls")
+summary(mortgage_rate)
 
-ggplot(House_Values_2, aes(x=bath ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+#converting the column to date format
+mortgage_rate$observation_date <- as.Date(mortgage_rate$observation_date)
+str(mortgage_rate)
+summary(mortgage_rate)
 
-ggplot(House_Values_2, aes(x=bed ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+#Join mortgage rate and House value data
+House_Values_4 <- House_Values_3 %>% 
+  inner_join(mortgage_rate,by=c("new_date"="observation_date"))
+summary(House_Values_4)
 
-ggplot(House_Values_2, aes(x=house_size ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+# Converting mortgage to log value
 
-ggplot(House_Values_2, aes(x=acre_lot ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+House_Values_4 <- House_Values_4 %>%
+  mutate(log_mortg = log(MORTGAGE30US))
 
-ggplot(House_Values_2, aes(x=state ,y=price,color=state))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+summary( House_Values_4)
 
 
-#Plot on dataframe with number of schools and hospitals
+#Inflation Rate Code to be used when we have a large data file
 
-ggplot(House_Values_3, aes(x=NumOfSchools ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+Inflation_Rate <- read_excel("Inflation_Rate.xls")
+summary(Inflation_Rate)
 
-ggplot(House_Values_3, aes(x=NumOfHospitals ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+#converting the column to date format
+Inflation_Rate$observation_date <- as.Date(Inflation_Rate$observation_date)
+str(Inflation_Rate)
+summary(Inflation_Rate)
+
+#Join inflation rate and House value data
+House_Values_5 <- House_Values_4 %>% 
+  inner_join(Inflation_Rate,by=c("new_date"="observation_date"))
+summary(House_Values_5)
+
+House_Values_5 <- House_Values_5 %>%
+  mutate(log_inflation = log(Inflation_Rate))
 
 #Display the house value index
-hist(House_Values_2$price)
+hist(House_Values_4$price)
 
 # add a log value for price as a new column for more clarity 
-House_Values_2 <- House_Values_2 %>% 
+House_Values_4 <- House_Values_4 %>% 
   mutate(log_Price= log(price))  
 
 #Display the house value index
-hist(House_Values_2$log_Price)
+hist(House_Values_4$log_Price)
 
+
+#plot on dataframe with All Predictors
+
+p1<- ggplot( House_Values_4, aes(x=log_mortg ,y=price ) )  +  geom_point() + geom_smooth(method="lm", se = FALSE )
+
+p2<- ggplot(House_Values_4, aes(x=new_date ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+
+p3<- ggplot(House_Values_4, aes(x=bath ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+
+p4<- ggplot(House_Values_4, aes(x=bed ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+
+p5<- ggplot(House_Values_4, aes(x=house_size ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+
+p6<- ggplot(House_Values_4, aes(x=acre_lot ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+
+p7<- ggplot(House_Values_4, aes(x=NumOfHospitals ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+
+p8<- ggplot(House_Values_4, aes(x= NumOfSchools ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+
+ggplot(House_Values_4, aes(x=state ,y=price,color=state))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+
+
+
+# Plot grid to show all the predictor plots
+
+ggarrange(p1,p2,p3,p4,p5,p6,p7,p8,
+          labels = c("A", "B", "C","D","E","F","G","H"),
+          ncol = 3, nrow = 3)
+
+
+
+# Run regression all the predictors individually to get the significant predictors( P value)
+# P value less than 0.05 is statistically significant
 library(broom)
 
-regression1 <- lm(price~bath, data = House_Values_3)
+regression1 <- lm(price~bath, data = House_Values_4)
 summary(regression1)
 tidy(regression1)
 
 
-regression2 <- lm(price ~house_size  , data = House_Values_3)
+regression2 <- lm(price ~house_size  , data = House_Values_4)
 summary(regression2)
 tidy(regression2)
 
-regression3 <- lm(price ~bed  , data = House_Values_3)
+regression3 <- lm(price ~bed  , data = House_Values_4)
 summary(regression3)
 tidy(regression3)
 
-regression4 <- lm(price ~sold_date  , data = House_Values_3)
+regression4 <- lm(price ~sold_date  , data = House_Values_4)
 summary(regression4)
 
-regression5 <- lm(price ~acre_lot  , data = House_Values_2)
+regression5 <- lm(price ~acre_lot  , data = House_Values_4)
 summary(regression5)
 
-regression6 <- lm(price ~city  , data = House_Values_2)
-summary(regression6)
-
-regression7 <- lm(price ~NumOfSchools  , data = House_Values_3)
+regression7 <- lm(price ~NumOfSchools  , data = House_Values_4)
 summary(regression7)
 
-regression8 <- lm(price ~NumOfHospitals  , data = House_Values_3)
+regression8 <- lm(price ~NumOfHospitals  , data = House_Values_4)
 summary(regression8)
-
 
 tidy(regression1)
 tidy(regression2)
@@ -162,4 +219,27 @@ tidy(regression4)
 tidy(regression5)
 tidy(regression8)
 tidy(regression7)
+
+
+#Develop Model
+# Create few regression model to compare them and select the best that fits. Compare R-squared
+# R-squared: represents the proportion of variance explained by the model. The larger the values, the greater the model fit.
+
+regressionmodel1 <- lm(price ~ bath + house_size + bed + NumOfHospitals + NumOfSchools +log_mortg + acre_lot +sold_date  , data = House_Values_4)
+summary(regression9)
+tidy(regression9)
+
+
+#Train and Test The model
+
+# Train and Test 
+
+#libraries Required
+library(rsample)
+library(yardstick)
+
+#Code goes here
+
+
+
 
