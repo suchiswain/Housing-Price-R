@@ -24,9 +24,10 @@ summary(House_Values)
 
 #Count and Display the na values in each column
 colSums(is.na(House_Values))
-
+   
 #Remove duplicate values from the data
 duplicated(House_Values)
+
 House_Values_2 <- House_Values[!duplicated(House_Values), ]
 summary(House_Values_2)
 
@@ -224,14 +225,32 @@ tidy(regression7)
 #Develop Model
 # Create few regression model to compare them and select the best that fits. Compare R-squared
 # R-squared: represents the proportion of variance explained by the model. The larger the values, the greater the model fit.
+#Multiple R-squared:  0.4268,	Adjusted R-squared:  0.4241
+regressionmodel1 <- lm(log_Price ~ bath + house_size + bed + NumOfHospitals + NumOfSchools +log_mortg + acre_lot +sold_date  , data = House_Values_plot)
+summary(regressionmodel1)
+tidy(regressionmodel1)
 
-regressionmodel1 <- lm(price ~ bath + house_size + bed + NumOfHospitals + NumOfSchools +log_mortg + acre_lot +sold_date  , data = House_Values_4)
-summary(regression9)
-tidy(regression9)
+#regressionmodel2=  Multiple R-squared:  0.4107,	Adjusted R-squared:  0.4087 (excluded NumOfHospitals+NumOfSchools)
+
+regressionmodel2 <- lm(log_Price ~ bath + house_size + bed +log_mortg + acre_lot +sold_date  , data = House_Values_plot)
+summary(regressionmodel2)
+tidy(regressionmodel2)
+
+
+#regressionmodel3 =Multiple R-squared:  0.4107,	Adjusted R-squared:  0.409   0.3744 (excluded NumOfHospitals+NumOfSchools +sold_date)
+regressionmodel3 <- lm(log_Price ~ bath + house_size + bed +log_mortg + acre_lot, data = House_Values_plot)
+summary(regressionmodel3)
+tidy(regressionmodel3)
+
+
+#Multiple R-squared:  0.4267,	Adjusted R-squared:  0.4244 
+regressionmodel4 <- lm(log_Price ~ bath + house_size + bed + NumOfHospitals + NumOfSchools +log_mortg + acre_lot   , data = House_Values_plot)
+summary(regressionmodel4)
+
+
 
 
 #Train and Test The model
-
 # Train and Test 
 
 #libraries Required
@@ -239,7 +258,27 @@ library(rsample)
 library(yardstick)
 
 #Code goes here
+set.seed(645)
+House_Values_plot_split <- initial_split(House_Values_plot, prop = 0.7)
+House_Values_plot_train <- training(House_Values_plot_split)
+House_Values_plot_test <- testing(House_Values_plot_split)
+House_Values_plot_train
 
+# Evaluation on train data
+regression_train  <- lm(log_Price ~ bath + house_size + bed + NumOfHospitals + 
+                          NumOfSchools +log_mortg + acre_lot   , data = House_Values_plot_train)
 
+House_Values_plot_train <- House_Values_plot_train %>% 
+  mutate(predicted_House_Values_plot= predict(regression_train ))
+rmse(House_Values_plot_train, log_Price, predicted_House_Values_plot)
+
+# rmse    standard    0.654
+
+# Evaluation on test data
+House_Values_plot_test  <- House_Values_plot_test  %>% 
+  mutate(predicted_House_Values_plot = predict(regression_train, newdata = House_Values_plot_test))
+rmse(House_Values_plot_test, log_Price, predicted_House_Values_plot)
+
+#rmse    standard    0.610
 
 
