@@ -211,29 +211,29 @@ ggarrange(p1,p2,p3,p4,p5,p6,p7,p8,
 # P value less than 0.05 is statistically significant
 library(broom)
 
-regression1 <- lm(price~bath, data = House_Values_plot)
+regression1 <- lm(log_Price~bath, data = House_Values_plot)
 summary(regression1)
 tidy(regression1)
 
 
-regression2 <- lm(price ~house_size  , data = House_Values_plot)
+regression2 <- lm(log_Price ~house_size  , data = House_Values_plot)
 summary(regression2)
 tidy(regression2)
 
-regression3 <- lm(price ~bed  , data = House_Values_plot)
+regression3 <- lm(log_Price ~bed  , data = House_Values_plot)
 summary(regression3)
 tidy(regression3)
 
-regression4 <- lm(price ~sold_date  , data = House_Values_plot)
+regression4 <- lm(log_Price ~sold_date  , data = House_Values_plot)
 summary(regression4)
 
-regression5 <- lm(price ~acre_lot  , data = House_Values_plot)
+regression5 <- lm(log_Price ~acre_lot  , data = House_Values_plot)
 summary(regression5)
 
-regression7 <- lm(price ~NumOfSchools  , data = House_Values_plot)
+regression7 <- lm(log_Price ~NumOfSchools  , data = House_Values_plot)
 summary(regression7)
 
-regression8 <- lm(price ~NumOfHospitals  , data = House_Values_plot)
+regression8 <- lm(log_Price ~NumOfHospitals  , data = House_Values_plot)
 summary(regression8)
 
 tidy(regression1)
@@ -249,20 +249,61 @@ tidy(regression7)
 # Create few regression model to compare them and select the best that fits. Compare R-squared
 # R-squared: represents the proportion of variance explained by the model. The larger the values, the greater the model fit.
 
-regressionmodel1 <- lm(price ~ bath + house_size + bed + NumOfHospitals + NumOfSchools +log_mortg + acre_lot +sold_date  , data = House_Values_plot)
+##With All the variables
+regressionmodel1 <- lm(log_Price ~ bath + house_size + bed + NumOfHospitals + NumOfSchools +log_mortg + acre_lot +sold_date  , data = House_Values_plot)
 summary(regressionmodel1)
+
+#Drop sold date
+regressionmodel2 <- lm(log_Price ~ bath + house_size + bed + NumOfHospitals + NumOfSchools +log_mortg + acre_lot   , data = House_Values_plot)
+summary(regressionmodel2)
+
+#Drop sold date and acre_lot
+regressionmodel3 <- lm(log_Price ~ bath + house_size + bed + NumOfHospitals + NumOfSchools +log_mortg    , data = House_Values_plot)
+summary(regressionmodel3)
+
+#Drop sold date and acre_lot and bath
+regressionmodel4 <- lm(log_Price ~  house_size + bed + NumOfHospitals + NumOfSchools +log_mortg    , data = House_Values_plot)
+summary(regressionmodel4)
+
+# DRop sold date and acre_lot and NumOfHospitals
+regressionmodel5 <- lm(log_Price ~ bath + house_size + bed  + NumOfSchools +log_mortg    , data = House_Values_plot)
+summary(regressionmodel5)
+
+regressionmodel6 <- lm(log_Price ~ bath + house_size + bed  +  acre_lot + NumOfSchools+sold_date+log_mortg    , data = House_Values_plot)
+summary(regressionmodel6)
+
 tidy(regressionmodel1)
 
 
 #Train and Test The model
 
 # Train and Test 
+## Calculate RMSE on test data
+## A metric that tells us how far apart the predicted values are from the observed values in a dataset, on average. 
+## The lower the RMSE, the better a model fits a dataset.
 
 #libraries Required
 library(rsample)
 library(yardstick)
 
 #Code goes here
+
+House_Values_Split <- initial_split(House_Values_plot, prop = 0.7)
+
+House_Values_Train <- training(House_Values_Split)
+House_Values_Test <- testing(House_Values_Split)
+
+##Use the best regression model to Train the data
+#used regression model 4
+House_Values_Predict_Train<- lm(log_Price ~ bath + house_size + bed + NumOfHospitals + NumOfSchools +log_mortg + acre_lot  , data = House_Values_Train)
+summary(House_Values_Predict_Train)
+
+House_Values_Test <- House_Values_Test %>% 
+  mutate(Price_pred = predict(House_Values_Predict_Train, newdata =House_Values_Test))
+
+rmse(House_Values_Test, log_Price,Price_pred)
+rsq(House_Values_Test, log_Price,Price_pred)
+
 
 
 
