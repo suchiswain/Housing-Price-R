@@ -125,23 +125,6 @@ House_Values_4 <- House_Values_4 %>%
 summary( House_Values_4)
 
 
-#Inflation Rate Code to be used when we have a large data file
-
-Inflation_Rate <- read_excel("Inflation_Rate.xls")
-summary(Inflation_Rate)
-
-#converting the column to date format
-Inflation_Rate$observation_date <- as.Date(Inflation_Rate$observation_date)
-str(Inflation_Rate)
-summary(Inflation_Rate)
-
-#Join inflation rate and House value data
-House_Values_5 <- House_Values_4 %>% 
-  inner_join(Inflation_Rate,by=c("new_date"="observation_date"))
-summary(House_Values_5)
-
-House_Values_5 <- House_Values_5 %>%
-  mutate(log_inflation = log(Inflation_Rate))
 
 #Display the house value index
 hist(House_Values_4$price)
@@ -154,25 +137,62 @@ House_Values_4 <- House_Values_4 %>%
 hist(House_Values_4$log_Price)
 
 
+House_Values_plot <- House_Values_4 %>%
+  filter(state %in% c("New York","Massachusetts","New Hampshire"))
+
 #plot on dataframe with All Predictors
 
-p1<- ggplot( House_Values_4, aes(x=log_mortg ,y=price ) )  +  geom_point() + geom_smooth(method="lm", se = FALSE )
+p1<- ggplot( House_Values_plot, aes(x=log_mortg ,y=log_Price,color=state ) )  + 
+  geom_point() + geom_smooth(method="lm", se = FALSE ,color="black")+
+  facet_grid(.~state)+
+  labs(title = " Mortgage Rate Vs Price", x="Mortgage Rate", y="Price")+
+  theme(legend.position="none") 
 
-p2<- ggplot(House_Values_4, aes(x=new_date ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p2<- ggplot(House_Values_plot, aes(x=sold_date ,y=log_Price,color=state))+ 
+  geom_point() + geom_smooth(method="lm", se = FALSE,color="black")+
+  facet_grid(.~state)+
+  labs(title = " Sold Date Vs Price", x=" Sold Date", y="Price")+
+  theme(legend.position="none") 
 
-p3<- ggplot(House_Values_4, aes(x=bath ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p3<- ggplot(House_Values_plot, aes(x=bath ,y=log_Price,color=state))+  
+  geom_point() + geom_smooth(method="lm", se = FALSE,color="black") +
+  facet_grid(.~state)+
+  labs(title = " No. Of Bathrooms Vs Price", x=" BathRooms", y="Price")+
+  theme(legend.position="none") 
 
-p4<- ggplot(House_Values_4, aes(x=bed ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p4<- ggplot(House_Values_plot, aes(x=bed ,y=log_Price,color=state))+  
+  geom_point() + geom_smooth(method="lm", se = FALSE,color="black")+
+  facet_grid(.~state)+
+  labs(title = " No. Of Bedrooms Vs Price", x="BedRooms", y="Price")+
+  theme(legend.position="none") 
 
-p5<- ggplot(House_Values_4, aes(x=house_size ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p5<- ggplot(House_Values_plot, aes(x=house_size ,y=log_Price, color=state))+  
+  geom_point() + geom_smooth(method="lm", se = FALSE,color="black")+
+  facet_grid(.~state)+
+  labs(title = " House Size Vs Price", x="House Size", y="Price")+
+  theme(legend.position="none") 
 
-p6<- ggplot(House_Values_4, aes(x=acre_lot ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p6<- ggplot(House_Values_plot, aes(x=acre_lot ,y=log_Price,color=state))+  
+  geom_point() + geom_smooth(method="lm", se = FALSE,color="black")+
+  facet_grid(.~state)+
+  labs(title = " Acre Lot Vs Price", x="Acre Lot", y="Price")+
+  theme(legend.position="none") 
 
-p7<- ggplot(House_Values_4, aes(x=NumOfHospitals ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p7<- ggplot(House_Values_plot, aes(x=NumOfHospitals ,y=log_Price,color=state))+ 
+  geom_point() + geom_smooth(method="lm", se = FALSE,color="black") +
+  facet_grid(.~state)+
+  labs(title = " No. of Hospitals Vs Price", x="No. of Hospitals", y="Price")+
+  theme(legend.position="none") 
 
-p8<- ggplot(House_Values_4, aes(x= NumOfSchools ,y=price))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+p8<- ggplot(House_Values_plot, aes(x= NumOfSchools ,y=log_Price,color=state))+ 
+  geom_point() + geom_smooth(method="lm", se = FALSE,color="black") +
+  facet_grid(.~state)+
+  labs(title = " No. of schools Vs Price", x="No. of Schools", y="Price")+
+  theme(legend.position="none") 
 
-ggplot(House_Values_4, aes(x=state ,y=price,color=state))+  geom_point() + geom_smooth(method="lm", se = FALSE)
+ggplot(House_Values_plot, aes(x=state ,y=log_Price,color=state))+ 
+  geom_point() + geom_smooth(method="lm", se = FALSE,color="black")
+
 
 
 
@@ -188,29 +208,29 @@ ggarrange(p1,p2,p3,p4,p5,p6,p7,p8,
 # P value less than 0.05 is statistically significant
 library(broom)
 
-regression1 <- lm(price~bath, data = House_Values_4)
+regression1 <- lm(log_Price~bath, data = House_Values_plot)
 summary(regression1)
 tidy(regression1)
 
 
-regression2 <- lm(price ~house_size  , data = House_Values_4)
+regression2 <- lm(log_Price ~house_size  , data = House_Values_plot)
 summary(regression2)
 tidy(regression2)
 
-regression3 <- lm(price ~bed  , data = House_Values_4)
+regression3 <- lm(log_Price ~bed  , data = House_Values_plot)
 summary(regression3)
 tidy(regression3)
 
-regression4 <- lm(price ~sold_date  , data = House_Values_4)
+regression4 <- lm(log_Price ~sold_date  , data = House_Values_plot)
 summary(regression4)
 
-regression5 <- lm(price ~acre_lot  , data = House_Values_4)
+regression5 <- lm(log_Price ~acre_lot  , data = House_Values_plot)
 summary(regression5)
 
-regression7 <- lm(price ~NumOfSchools  , data = House_Values_4)
+regression7 <- lm(log_Price ~NumOfSchools  , data = House_Values_plot)
 summary(regression7)
 
-regression8 <- lm(price ~NumOfHospitals  , data = House_Values_4)
+regression8 <- lm(log_Price ~NumOfHospitals  , data = House_Values_plot)
 summary(regression8)
 
 tidy(regression1)
