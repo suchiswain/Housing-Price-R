@@ -70,11 +70,6 @@ summary(House_Values_2)
 House_Values_2<- House_Values_2 %>% filter(bath<15)
 summary(House_Values_2)
 
-#Filter houses with acre lot less than 1
-House_Values_2<- House_Values_2 %>% filter(acre_lot<1)
-summary(House_Values_2)
-
-
 #Read the school data
 Schools <- read.csv("Public_School_Data.csv")
 summary(Schools)
@@ -129,13 +124,14 @@ House_Values_4 <- House_Values_4 %>%
 
 summary( House_Values_4)
 
+
+
 #Display the house value index
 hist(House_Values_4$price)
 
 # add a log value for price as a new column for more clarity 
 House_Values_4 <- House_Values_4 %>% 
   mutate(log_Price= log(price))  
-
 
 #Display the house value index
 hist(House_Values_4$log_Price)
@@ -160,7 +156,7 @@ p2<- ggplot(House_Values_plot, aes(x=sold_date ,y=log_Price,color=state))+
 
 p3<- ggplot(House_Values_plot, aes(x=bath ,y=log_Price,color=state))+  
   geom_point() + geom_smooth(method="lm", se = FALSE,color="black") +
-facet_grid(.~state)+
+  facet_grid(.~state)+
   labs(title = " No. Of Bathrooms Vs Price", x=" BathRooms", y="Price")+
   theme(legend.position="none") 
 
@@ -194,8 +190,9 @@ p8<- ggplot(House_Values_plot, aes(x= NumOfSchools ,y=log_Price,color=state))+
   labs(title = " No. of schools Vs Price", x="No. of Schools", y="Price")+
   theme(legend.position="none") 
 
-ggplot(House_Values_4, aes(x=state ,y=log_Price,color=state))+ 
+ggplot(House_Values_plot, aes(x=state ,y=log_Price,color=state))+ 
   geom_point() + geom_smooth(method="lm", se = FALSE,color="black")
+
 
 
 
@@ -251,7 +248,6 @@ tidy(regression7)
 # Create few regression model to compare them and select the best that fits. Compare R-squared
 # R-squared: represents the proportion of variance explained by the model. The larger the values, the greater the model fit.
 
-##With All the variables
 
 #Multiple R-squared:  0.4268,	Adjusted R-squared:  0.4241
 regressionmodel1 <- lm(log_Price ~ bath + house_size + bed + NumOfHospitals + NumOfSchools +log_mortg + acre_lot +sold_date  , data = House_Values_plot)
@@ -293,8 +289,9 @@ tidy(regressionmodel7)
 
 
 
-#Train and Test The model
 
+
+#Train and Test The model
 # Train and Test 
 ## Calculate RMSE on test data
 ## A metric that tells us how far apart the predicted values are from the observed values in a dataset, on average. 
@@ -314,7 +311,10 @@ House_Values_plot_train <- training(House_Values_plot_split)
 House_Values_plot_test <- testing(House_Values_plot_split)
 House_Values_plot_train
 
+<<<<<<< HEAD
 #Using regressionmodel4 to evaluate the data
+=======
+  >>>>>>> 90d2e0c1cfe73f41bf7f31496a04dd972a246daa
 # Evaluation on train data
 regression_train  <- lm(log_Price ~ bath + house_size + bed + NumOfHospitals + 
                           NumOfSchools +log_mortg + acre_lot   , data = House_Values_plot_train)
@@ -331,6 +331,7 @@ House_Values_plot_test  <- House_Values_plot_test  %>%
 rmse(House_Values_plot_test, log_Price, predicted_House_Values_plot)
 
 #rmse    standard    0.610
+<<<<<<< HEAD
 
 
 #Using regressionmodel4 to evaluate the data
@@ -367,6 +368,7 @@ House_Values_plot_test  <- House_Values_plot_test  %>%
 rmse(House_Values_plot_test, log_Price, predicted_House_Values_plot)
 
 #rmse    standard    0.609
+
 
 
 
