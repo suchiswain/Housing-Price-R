@@ -311,10 +311,9 @@ House_Values_plot_train <- training(House_Values_plot_split)
 House_Values_plot_test <- testing(House_Values_plot_split)
 House_Values_plot_train
 
-<<<<<<< HEAD
+
 #Using regressionmodel4 to evaluate the data
-=======
-  >>>>>>> 90d2e0c1cfe73f41bf7f31496a04dd972a246daa
+
 # Evaluation on train data
 regression_train  <- lm(log_Price ~ bath + house_size + bed + NumOfHospitals + 
                           NumOfSchools +log_mortg + acre_lot   , data = House_Values_plot_train)
@@ -331,8 +330,6 @@ House_Values_plot_test  <- House_Values_plot_test  %>%
 rmse(House_Values_plot_test, log_Price, predicted_House_Values_plot)
 
 #rmse    standard    0.610
-<<<<<<< HEAD
-
 
 #Using regressionmodel4 to evaluate the data
 #NEW Evaluation on train data
@@ -368,6 +365,146 @@ House_Values_plot_test  <- House_Values_plot_test  %>%
 rmse(House_Values_plot_test, log_Price, predicted_House_Values_plot)
 
 #rmse    standard    0.609
+
+# Logistic Regression MODEL - Higher the AUC better the model
+
+library(caret)
+library(cutpointr)
+
+# We have selected "MORTGAGE30US" to be the binary variable
+#Create new variable MORTGAGE30US_percentage defined as 1 if percentage > 4 and 0 otherwise
+
+set.seed(645)
+House_Values_plot <- House_Values_plot %>%
+  mutate(MORTGAGE30US_percentage = if_else(MORTGAGE30US>4, 1, 0))
+
+# Train and Test the logistic model1
+
+House_Values_plot_split1 <- initial_split(House_Values_plot, prop = 0.7)
+House_Values_plot_train1 <- training(House_Values_plot_split1)
+House_Values_plot_test1 <- testing(House_Values_plot_split1)
+
+str(House_Values_plot_train1)
+
+# Logistic Model 1 with all the predictor variables- 
+Mortgage_percentage1 <- glm(MORTGAGE30US_percentage ~ bed + bath + acre_lot + house_size + NumOfSchools + NumOfHospitals + log_Price + sold_date, data = House_Values_plot_train1, family = "binomial")
+summary(Mortgage_percentage1) 
+
+# ROC Curve and AUC
+# AUC is 0.9292294
+House_Values_plot_test1 <- House_Values_plot_test1 %>% 
+  mutate(predicted_probability_default = predict(Mortgage_percentage1, newdata = House_Values_plot_test1, type = "response")) 
+
+roc_1 <- roc(House_Values_plot_test1, x= predicted_probability_default, class = MORTGAGE30US_percentage, pos_class = 1, neg_class = 0)
+
+plot(roc_1)
+auc(roc_1)
+plot(roc_1) + 
+  geom_line(data = roc_1, color = "red") + 
+  geom_abline(slope = 1) + 
+  labs(title = "ROC Curve for Logistic Regression")
+
+# Logistic Model 2 with all the predictor variables but excluding NumOfSchools and NumOfHospitals 
+Mortgage_percentage2 <- glm(MORTGAGE30US_percentage ~ bed + bath + acre_lot + house_size + sold_date, data = House_Values_plot_train1, family = "binomial")
+summary(Mortgage_percentage2) 
+
+# ROC Curve and AUC
+# AUC is 0.9311881
+House_Values_plot_test1 <- House_Values_plot_test1 %>% 
+  mutate(predicted_probability_default = predict(Mortgage_percentage2, newdata = House_Values_plot_test1, type = "response")) 
+
+roc_2 <- roc(House_Values_plot_test1, x= predicted_probability_default, class = MORTGAGE30US_percentage, pos_class = 1, neg_class = 0)
+
+plot(roc_2)
+auc(roc_2)
+plot(roc_2) + 
+  geom_line(data = roc_2, color = "red") + 
+  geom_abline(slope = 1) + 
+  labs(title = "ROC Curve for Logistic Regression")
+
+# Logistic Model 3 with all the predictor variables but excluding bed, bath, and sold_date
+Mortgage_percentage3 <- glm(MORTGAGE30US_percentage ~ acre_lot + house_size + NumOfSchools + NumOfHospitals +log_Price , data = House_Values_plot_train1, family = "binomial")
+summary(Mortgage_percentage3) 
+
+# ROC Curve and AUC
+# AUC is 0.5073612
+House_Values_plot_test1 <- House_Values_plot_test1 %>% 
+  mutate(predicted_probability_default = predict(Mortgage_percentage3, newdata = House_Values_plot_test1, type = "response")) 
+
+roc_3 <- roc(House_Values_plot_test1, x= predicted_probability_default, class = MORTGAGE30US_percentage, pos_class = 1, neg_class = 0)
+
+plot(roc_3)
+auc(roc_3)
+plot(roc_3) + 
+  geom_line(data = roc_3, color = "red") + 
+  geom_abline(slope = 1) + 
+  labs(title = "ROC Curve for Logistic Regression")
+
+# Logistic Model 4 with all the predictor variables but excluding acre_lot and house_size 
+Mortgage_percentage4 <- glm(MORTGAGE30US_percentage ~ bed + bath + NumOfSchools + NumOfHospitals + log_Price + sold_date, data = House_Values_plot_train1, family = "binomial")
+summary(Mortgage_percentage4) 
+
+# ROC Curve and AUC
+# AUC is 0.9292079
+House_Values_plot_test1 <- House_Values_plot_test1 %>% 
+  mutate(predicted_probability_default = predict(Mortgage_percentage4, newdata = House_Values_plot_test1, type = "response")) 
+
+roc_4 <- roc(House_Values_plot_test1, x= predicted_probability_default, class = MORTGAGE30US_percentage, pos_class = 1, neg_class = 0)
+
+plot(roc_4)
+auc(roc_4)
+plot(roc_4) + 
+  geom_line(data = roc_4, color = "red") + 
+  geom_abline(slope = 1) + 
+  labs(title = "ROC Curve for Logistic Regression")
+
+# Logistic Model 5 with all the predictor variables but excluding  sold_date
+Mortgage_percentage5 <- glm(MORTGAGE30US_percentage ~ bed + bath + acre_lot + house_size + NumOfSchools + NumOfHospitals + log_Price, data = House_Values_plot_train1, family = "binomial")
+summary(Mortgage_percentage5) 
+
+# ROC Curve and AUC
+# AUC is 0.5049935
+House_Values_plot_test1 <- House_Values_plot_test1 %>% 
+  mutate(predicted_probability_default = predict(Mortgage_percentage5, newdata = House_Values_plot_test1, type = "response")) 
+
+roc_5 <- roc(House_Values_plot_test1, x= predicted_probability_default, class = MORTGAGE30US_percentage, pos_class = 1, neg_class = 0)
+
+plot(roc_5)
+auc(roc_5)
+plot(roc_5) + 
+  geom_line(data = roc_5, color = "red") + 
+  geom_abline(slope = 1) + 
+  labs(title = "ROC Curve for Logistic Regression")
+
+#Logistic Model 2 is a good fit as it has highest AUC (AUC 0.9311881) and off all the variables sold_date has significant impact on predicting house price.
+
+
+#Confusion Matrix
+
+House_Values_plot_test1 <- House_Values_plot_test1 %>% 
+  mutate(predicted_mortgage_rate = predict(Mortgage_percentage2, newdata = House_Values_plot_test1, type = "response")) %>%
+  mutate(predicted_mortgage1 = if_else(predicted_mortgage_rate>0.5, 1, 0)) %>% 
+  mutate(predicted_mortgage2 = if_else(predicted_probability_default>0.2, 1, 0)) %>% 
+  mutate(predicted_mortgage3 = if_else(predicted_probability_default>0.3, 1, 0)) %>% 
+  mutate(predicted_mortgage4 = if_else(predicted_probability_default>0.4, 1, 0)) %>% 
+  mutate(predicted_mortgage5 = if_else(predicted_probability_default>0.1, 1, 0))
+  
+  
+
+confusionMatrix(as.factor(House_Values_plot_test1$predicted_mortgage1), as.factor(House_Values_plot_test1$MORTGAGE30US_percentage), positive = "1")
+
+confusionMatrix(as.factor(House_Values_plot_test1$predicted_mortgage2), as.factor(House_Values_plot_test1$MORTGAGE30US_percentage), positive = "1")
+
+confusionMatrix(as.factor(House_Values_plot_test1$predicted_mortgage3), as.factor(House_Values_plot_test1$MORTGAGE30US_percentage), positive = "1")
+
+confusionMatrix(as.factor(House_Values_plot_test1$predicted_mortgage4), as.factor(House_Values_plot_test1$MORTGAGE30US_percentage), positive = "1")
+
+confusionMatrix(as.factor(House_Values_plot_test1$predicted_mortgage5), as.factor(House_Values_plot_test1$MORTGAGE30US_percentage), positive = "1")
+
+
+
+
+
 
 
 
