@@ -484,10 +484,10 @@ plot(roc_5) +
 House_Values_plot_test1 <- House_Values_plot_test1 %>% 
   mutate(predicted_mortgage_rate = predict(Mortgage_percentage2, newdata = House_Values_plot_test1, type = "response")) %>%
   mutate(predicted_mortgage1 = if_else(predicted_mortgage_rate>0.5, 1, 0)) %>% 
-  mutate(predicted_mortgage2 = if_else(predicted_probability_default>0.2, 1, 0)) %>% 
-  mutate(predicted_mortgage3 = if_else(predicted_probability_default>0.3, 1, 0)) %>% 
-  mutate(predicted_mortgage4 = if_else(predicted_probability_default>0.4, 1, 0)) %>% 
-  mutate(predicted_mortgage5 = if_else(predicted_probability_default>0.1, 1, 0))
+  mutate(predicted_mortgage2 = if_else(predicted_mortgage_rate>0.2, 1, 0)) %>% 
+  mutate(predicted_mortgage3 = if_else(predicted_mortgage_rate>0.3, 1, 0)) %>% 
+  mutate(predicted_mortgage4 = if_else(predicted_mortgage_rate>0.4, 1, 0)) %>% 
+  mutate(predicted_mortgage5 = if_else(predicted_mortgage_rate>0.1, 1, 0))
   
   
 
@@ -502,7 +502,13 @@ confusionMatrix(as.factor(House_Values_plot_test1$predicted_mortgage4), as.facto
 confusionMatrix(as.factor(House_Values_plot_test1$predicted_mortgage5), as.factor(House_Values_plot_test1$MORTGAGE30US_percentage), positive = "1")
 
 
+# Determining optimal cutoff to maximize accuracy or the sum of sensitivity and specificity
 
+cutpointr(House_Values_plot_test1, x= predicted_mortgage_rate, class = MORTGAGE30US_percentage, pos_class = 1, neg_class = 0, 
+          method = maximize_metric, metric = accuracy, na.rm = TRUE)
+
+cutpointr(House_Values_plot_test1, x= predicted_mortgage_rate, class = MORTGAGE30US_percentage, pos_class = 1, neg_class = 0, 
+          method = maximize_metric, metric = sum_sens_spec, na.rm = TRUE)
 
 
 
