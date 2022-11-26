@@ -504,14 +504,19 @@ confusionMatrix(as.factor(House_Values_plot_test1$predicted_mortgage5), as.facto
 
 # Determining optimal cutoff to maximize accuracy or the sum of sensitivity and specificity
 
-cutpointr(House_Values_plot_test1, x= predicted_mortgage_rate, class = MORTGAGE30US_percentage, pos_class = 1, neg_class = 0, 
+cpt1<- cutpointr(House_Values_plot_test1, x= predicted_mortgage_rate, class = MORTGAGE30US_percentage, pos_class = 1, neg_class = 0, 
           method = maximize_metric, metric = accuracy, na.rm = TRUE)
 
-cutpointr(House_Values_plot_test1, x= predicted_mortgage_rate, class = MORTGAGE30US_percentage, pos_class = 1, neg_class = 0, 
+cpt2<-cutpointr(House_Values_plot_test1, x= predicted_mortgage_rate, class = MORTGAGE30US_percentage, pos_class = 1, neg_class = 0, 
           method = maximize_metric, metric = sum_sens_spec, na.rm = TRUE)
 
+# the optimal cutoff value of 0.269 in cpt2 has more sensitivity(True Positive Prediction)
+House_Values_plot_test1 <- House_Values_plot_test1 %>% 
+  mutate(predicted_mortgage_rate = predict(Mortgage_percentage2, newdata = House_Values_plot_test1, type = "response")) %>%
+  mutate(predicted_mortgage1 = if_else(predicted_mortgage_rate>0.269, 1, 0))
 
-
+# Using the optimal cutoff for the confusion matrix.
+confusionMatrix(as.factor(House_Values_plot_test1$predicted_mortgage1), as.factor(House_Values_plot_test1$MORTGAGE30US_percentage), positive = "1")
 
 
 
