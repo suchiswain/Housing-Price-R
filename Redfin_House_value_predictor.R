@@ -127,73 +127,112 @@ summary( House_Values_4)
 
 
 #Display the house value index
-hist(House_Values_4$price)
 
+
+h <- hist(House_Values_4$price, plot=FALSE)
+cuts <- cut(h$breaks, c(-Inf,-.5,1.75,Inf))
+plot(h, col=cuts)
 # add a log value for price as a new column for more clarity 
 House_Values_4 <- House_Values_4 %>% 
   mutate(log_Price= log(price))  
 
 #Display the house value index
-hist(House_Values_4$log_Price)
+
+h <- hist(House_Values_4$log_Price, plot=FALSE)
+cuts <- cut(h$breaks, c(-Inf,-.5,1.75,Inf))
+plot(h, col=cuts)
+
 
 
 House_Values_plot <- House_Values_4 %>%
   filter(state %in% c("New York","Massachusetts","New Hampshire"))
 
+
 #plot on dataframe with All Predictors
 
-p1<- ggplot( House_Values_plot, aes(x=log_mortg ,y=log_Price,color=state ) )  + 
-  geom_point() + geom_smooth(method="lm", se = FALSE ,color="black")+
+p1<-ggplot( House_Values_plot, aes(x=log_mortg ,y=log_Price,color=state ) )  + 
+  geom_point() + geom_smooth(method="lm", se = TRUE ,color="black")+
   facet_grid(.~state)+
-  labs(title = " Mortgage Rate Vs Price", x="Mortgage Rate", y="Price")+
-  theme(legend.position="none") 
+  labs(title = " Mortgage Rate Vs Price", x="Mortgage Rate", y="Price(log Price)")+
+  theme(legend.position="none") +
+  xlim(c(1, 2.5))+
+  scale_colour_brewer(palette = "Set1")
 
-p2<- ggplot(House_Values_plot, aes(x=sold_date ,y=log_Price,color=state))+ 
-  geom_point() + geom_smooth(method="lm", se = FALSE,color="black")+
+#From the plots it is observed that Interest Rates don't affect house prices. Infact, it tends to go up
+
+
+p2<-  ggplot(House_Values_plot, aes(x=sold_date ,y=log_Price,color=state))+ 
+  geom_point() + geom_smooth(method="lm", se = TRUE,color="black")+
   facet_grid(.~state)+
-  labs(title = " Sold Date Vs Price", x=" Sold Date", y="Price")+
-  theme(legend.position="none") 
+  labs(title = " Sold Date Vs Price", x=" Sold Date", y="Price(log Price)")+
+  theme(legend.position="none") +
+  scale_colour_brewer(palette = "Set1")
+
+#From the plots it is observed that the price keeps increasing over the period
 
 p3<- ggplot(House_Values_plot, aes(x=bath ,y=log_Price,color=state))+  
-  geom_point() + geom_smooth(method="lm", se = FALSE,color="black") +
+  geom_point() + geom_smooth(method="lm", se = TRUE,color="black") +
   facet_grid(.~state)+
-  labs(title = " No. Of Bathrooms Vs Price", x=" BathRooms", y="Price")+
-  theme(legend.position="none") 
+  labs(title = " No. of Bathrooms Vs Price", x=" BathRooms", y="Price(log Price)")+
+  theme(legend.position="none") +
+  xlim(c(1, 6))+
+  scale_colour_brewer(palette = "Set1")
+
+# Observed that bathrooms increases the value of House prices
+
 
 p4<- ggplot(House_Values_plot, aes(x=bed ,y=log_Price,color=state))+  
-  geom_point() + geom_smooth(method="lm", se = FALSE,color="black")+
+  geom_point() + geom_smooth(method="lm", se = TRUE,color="black")+
   facet_grid(.~state)+
-  labs(title = " No. Of Bedrooms Vs Price", x="BedRooms", y="Price")+
-  theme(legend.position="none") 
+  labs(title = " No. of Bedrooms Vs Price", x="BedRooms", y="Price(log Price)")+
+  theme(legend.position="none")  +
+  xlim(c(1, 6))+
+  scale_colour_brewer(palette = "Set1")
+#From the plots it is observed that bedrooms increases the value of House prices
+
+
 
 p5<- ggplot(House_Values_plot, aes(x=house_size ,y=log_Price, color=state))+  
-  geom_point() + geom_smooth(method="lm", se = FALSE,color="black")+
+  geom_point() + geom_smooth(method="lm", se = TRUE,color="black")+
   facet_grid(.~state)+
-  labs(title = " House Size Vs Price", x="House Size", y="Price")+
-  theme(legend.position="none") 
+  labs(title = " House Size Vs Price", x="House Size", y="Price(log Price)")+
+  theme(legend.position="none") +
+  xlim(c(1000, 5000))+
+  scale_colour_brewer(palette = "Set1")
+
+#Greater the house size, the greater the home value
+
+
+
 
 p6<- ggplot(House_Values_plot, aes(x=acre_lot ,y=log_Price,color=state))+  
   geom_point() + geom_smooth(method="lm", se = FALSE,color="black")+
   facet_grid(.~state)+
-  labs(title = " Acre Lot Vs Price", x="Acre Lot", y="Price")+
-  theme(legend.position="none") 
+  labs(title = " Acre Lot Vs Price", x="Acre Lot", y="Price(log Price)")+
+  xlim(c(0, 5))+
+  theme(legend.position="none") +
+  scale_colour_brewer(palette = "Set1")
+#observed that larger lots have a higher property value
+
+
 
 p7<- ggplot(House_Values_plot, aes(x=NumOfHospitals ,y=log_Price,color=state))+ 
-  geom_point() + geom_smooth(method="lm", se = FALSE,color="black") +
+  geom_point() + geom_smooth(method="lm", se = TRUE,color="black") +
   facet_grid(.~state)+
-  labs(title = " No. of Hospitals Vs Price", x="No. of Hospitals", y="Price")+
-  theme(legend.position="none") 
+  labs(title = " No. of Hospitals Vs Price", x="No. of Hospitals", y="Price(log Price)")+
+  theme(legend.position="none") +
+  scale_colour_brewer(palette = "Set1")
+#Hospitals clearly have an impact on house prices
 
+
+#No of schools increases property value. From the plot, Massachusetts prices dropped but overall the price increases
 p8<- ggplot(House_Values_plot, aes(x= NumOfSchools ,y=log_Price,color=state))+ 
-  geom_point() + geom_smooth(method="lm", se = FALSE,color="black") +
+  geom_point() + geom_smooth(method="lm", se = TRUE,color="black") +
   facet_grid(.~state)+
-  labs(title = " No. of schools Vs Price", x="No. of Schools", y="Price")+
-  theme(legend.position="none") 
-
-ggplot(House_Values_plot, aes(x=state ,y=log_Price,color=state))+ 
-  geom_point() + geom_smooth(method="lm", se = FALSE,color="black")
-
-
+  labs(title = " No. of schools Vs Price", x="No. of Schools", y="Price(log Price)")+
+  theme(legend.position="none") +
+  xlim(c(0, 20))+
+  scale_colour_brewer(palette = "Set1")
 
 
 # Plot grid to show all the predictor plots
@@ -519,5 +558,24 @@ House_Values_plot_test1 <- House_Values_plot_test1 %>%
 confusionMatrix(as.factor(House_Values_plot_test1$predicted_mortgage1), as.factor(House_Values_plot_test1$MORTGAGE30US_percentage), positive = "1")
 
 
+
+#decision tree model1
+
+library(rpart)
+library(rpart.plot)
+model1 <- rpart(log_Price ~ bath + house_size + bed + NumOfHospitals + 
+                  NumOfSchools +log_mortg + acre_lot   , data = House_Values_plot_train, method ="class")
+model1.plot <- rpart.plot(model1,box.palette = "blue", cex=0.8)
+summary(model1)
+
+model2 <- rpart(log_Price ~ bath + house_size + bed + 
+                  NumOfHospitals + NumOfSchools + acre_lot +sold_date, data = House_Values_plot_train, method="class")
+model2.plot <- rpart.plot(model2,box.palette = "yellow", cex=0.8)
+summary(model2)
+
+model3 <- rpart(log_Price ~ bath + house_size + bed + 
+                  NumOfHospitals + NumOfSchools + acre_lot +sold_date, data = House_Values_plot_train, method ="class")
+model3.plot <- rpart.plot(model3,box.palette = "green", cex=0.8)
+summary(model3)
 
 
