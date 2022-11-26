@@ -206,7 +206,7 @@ p5<- ggplot(House_Values_plot, aes(x=house_size ,y=log_Price, color=state))+
 
 
 p6<- ggplot(House_Values_plot, aes(x=acre_lot ,y=log_Price,color=state))+  
-  geom_point() + geom_smooth(method="lm", se = FALSE,color="black")+
+  geom_point() + geom_smooth(method="lm", se = TRUE,color="black")+
   facet_grid(.~state)+
   labs(title = " Acre Lot Vs Price", x="Acre Lot", y="Price(log Price)")+
   xlim(c(0, 5))+
