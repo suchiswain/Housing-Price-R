@@ -584,8 +584,8 @@ cpt2<-cutpointr(House_Values_plot_test1, x= predicted_log_price, class = price_b
 
 # the optimal cutoff value of 0.2235809 in cpt2 
 House_Values_plot_test1 <- House_Values_plot_test1 %>% 
-  mutate(predicted_log_price = predict(Mortgage_percentage2, newdata = House_Values_plot_test1, type = "response")) %>%
-  mutate(predicted_mortgage1 = if_else(predicted_mortgage_rate>0.269, 1, 0))
+  #mutate(predicted_log_price = predict(price_binary6, newdata = House_Values_plot_test1, type = "response")) %>%
+  mutate(predicted_log_price3 = if_else(predicted_log_price>0.2235809, 1, 0))
 
 # Using the optimal cutoff for the confusion matrix.
 confusionMatrix(as.factor(House_Values_plot_test1$predicted_log_price3), as.factor(House_Values_plot_test1$price_binary), positive = "1")
